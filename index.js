@@ -6,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./db/connectDb.js";
 import userRoutes from "./routes/User.router.js";
+import accountRoutes from "./routes/Account.router.js";
 import cookieParser from "cookie-parser";
 
 connectDB();
@@ -32,6 +33,7 @@ app.use(
 
 // Routes
 app.use("/api/user", userRoutes);
+app.use("/api/account", accountRoutes);
 
 // Routers
 app.get("/", (req, res) => {

@@ -5,7 +5,6 @@ import {
   generateRefreshToken,
 } from "../utils/generateTokens.js";
 import cookieOptions from "../utils/cookieOptions.js";
-import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
