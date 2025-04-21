@@ -6,9 +6,11 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./db/connectDb.js";
 import userRoutes from "./routes/User.router.js";
+import cookieParser from "cookie-parser";
 
 connectDB();
 const app = express();
+app.use(cookieParser());
 const allowedOrigins = ["http://localhost:5173"];
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
