@@ -1,13 +1,11 @@
-import dotenv from "dotenv";
-dotenv.config({
-  path: "./.env",
-});
+import "./config.js";
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./db/connectDb.js";
 import userRoutes from "./routes/User.router.js";
 import accountRoutes from "./routes/Account.router.js";
 import cookieParser from "cookie-parser";
+import stripeRoutes from "./routes/Stripe.router.js";
 
 connectDB();
 const app = express();
@@ -34,6 +32,7 @@ app.use(
 // Routes
 app.use("/api/user", userRoutes);
 app.use("/api/account", accountRoutes);
+app.use("/api/stripe", stripeRoutes);
 
 // Routers
 app.get("/", (req, res) => {
