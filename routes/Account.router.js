@@ -7,9 +7,9 @@ const router = express.Router();
 
 // Apply middleware before the controller
 router.post('/check-balance', verifyToken,  verifyActiveSubscription ,  checkBalance);
-router.post('/deposit', verifyToken, depositMoney);
-router.post('/create-account', verifyToken, createAccount);
+router.post('/deposit', verifyToken, verifyActiveSubscription , depositMoney);
+router.post('/create-account', verifyToken, verifyActiveSubscription ,  createAccount);
 router.post('/transfer-money', verifyToken, verifyActiveSubscription ,  transferMoney);
-router.get('/transaction', verifyToken, getAllTransaction);
+router.get('/transaction', verifyToken, verifyActiveSubscription , getAllTransaction);
 
 export default router;
