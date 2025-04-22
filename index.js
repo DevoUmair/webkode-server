@@ -9,14 +9,21 @@ import adminRoutes from "./routes/Admin.router.js";
 import cookieParser from "cookie-parser";
 import stripeRoutes from "./routes/Subscription.router.js";
 import { handleStripeWebhook } from "./controllers/Subscription.controllers.js";
+import { setupSwagger } from "./config/swaggerOptions.js";
+// Swagger route
+
+
 
 connectDB();
 const app = express();
+app.listen(5000, () => console.log("Server running on http://localhost:5000"));
 app.use(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }), // raw parser here
   handleStripeWebhook
 );
+
+setupSwagger(app);
 
 app.use(cookieParser());
 const allowedOrigins = ["http://localhost:5173"];
