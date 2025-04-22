@@ -81,6 +81,7 @@ export const login = async (req, res) => {
 
 export const refreshAccessToken = async (req, res) => {
   const token = req.cookies.refreshToken;
+  console.log(token);
 
   if (!token)
     return res.status(401).json({ message: "No refresh token provided" });
@@ -88,6 +89,8 @@ export const refreshAccessToken = async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.id);
+    console.log(token);
+    console.log(user.refreshToken);
 
     if (!user || user.refreshToken !== token)
       return res

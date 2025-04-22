@@ -42,3 +42,61 @@ export const generateInvoice = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+export const getInvoices = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const userId = req.user.id;
+    console.log(userId); 
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: "Start date and end date are required." });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); 
+
+    console.log(start , end);
+
+    const userAccounts = await Account.find({ userId }).select('_id');
+    console.log(userAccounts);
+    const accountIds = userAccounts.map(acc => acc._id);
+
+    const invoices = await Invoice.find({
+      $and: [
+        {
+          $or: [
+            { senderAccountId: { $in: accountIds } },
+            { receiverAccountId: { $in: accountIds } },
+          ],
+        },
+        { createdAt: { $gte: start, $lte: end } },
+      ]
+    })
+      .populate({
+        path: "senderAccountId",
+        populate: {
+          path: "userId",
+          select: "fullName email role"
+        }
+      })
+      .populate({
+        path: "receiverAccountId",
+        populate: {
+          path: "userId",
+          select: "fullName email role"
+        }
+      });
+
+    if (!invoices || invoices.length === 0) {
+      return res.status(404).json({ message: "No invoices found in the given date range." });
+    }
+
+    res.status(200).json(invoices);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error. Unable to fetch invoices.", error: error.message });
+  }
+};
+
