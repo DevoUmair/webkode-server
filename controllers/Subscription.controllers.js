@@ -59,7 +59,7 @@ export const handleStripeWebhook = async (req, res) => {
         userId,
         stripeCustomerId: customer,
         stripeSubscriptionId: subscription,
-        plan: stripeSubscription.items.data[0].price.nickname || "Unknown",
+        plan: stripeSubscription.items.data[0].price.id || "Unknown",
         status: stripeSubscription.status,
         startDate: new Date(stripeSubscription.start_date * 1000),
         endDate: new Date(
