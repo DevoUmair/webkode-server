@@ -135,3 +135,28 @@ export const login = async (req, res) => {
       res.status(500).json({ message: "Server error", error: err.message });
     }
   };
+
+  export const createAdmin = async (req, res) => {
+    const { fullName, email, password } = req.body;
+  
+    try {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+  
+      const newAdmin = new User({
+        fullName,
+        email,
+        password,
+        role: 'admin',
+      });
+  
+      await newAdmin.save();
+      res.status(201).json({ message: 'Admin user created successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+  
