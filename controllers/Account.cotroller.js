@@ -72,3 +72,44 @@ export const depositMoney = async (req, res) => {
     }
   };
   
+
+export const createAccount = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    console.log(req.body);
+
+    const decodedId = req.user.id;
+
+    if (userId !== decodedId) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+
+    const user = await User.findById(userId);
+    console.log(user);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const existingAccount = await Account.findOne({ userId });
+    if (existingAccount) {
+      return res.status(400).json({ message: 'Account already exists for this user' });
+    }
+
+    const account = new Account({
+      userId,
+      balance: 0,
+      cnic: req.body.cnic || null,
+    });
+
+    await account.save();
+
+    res.status(201).json({
+      message: 'Account created successfully',
+      accountId: account._id,
+      balance: account.balance,
+      cnic: account.cnic,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
