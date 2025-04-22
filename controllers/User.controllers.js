@@ -5,6 +5,7 @@ import {
   generateRefreshToken,
 } from "../utils/generateTokens.js";
 import cookieOptions from "../utils/cookieOptions.js";
+import Subscription from "../models/Subscription.model.js";
 
 export const register = async (req, res) => {
   try {
@@ -54,6 +55,7 @@ export const login = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
+    const subscription = await Subscription.findOne({ userId: user._id });
 
     res
       .cookie("refreshToken", refreshToken, cookieOptions)
@@ -66,6 +68,7 @@ export const login = async (req, res) => {
           fullName: user.fullName,
           email: user.email,
           role: user.role,
+          isSubscribed: subscription && subscription.status === "active",
         },
       });
   } catch (err) {
@@ -94,9 +97,23 @@ export const refreshAccessToken = async (req, res) => {
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    res
-      .cookie("refreshToken", newRefreshToken, cookieOptions)
-      .json({ accessToken: newAccessToken });
+    // We will fetch subscriptions
+    // isSubscribed = false;
+    const subscription = await Subscription.findOne({
+      userId: decoded.id,
+      status: "active",
+    });
+    const isSubscribed = Boolean(subscription);
+    res.cookie("refreshToken", newRefreshToken, cookieOptions).json({
+      accessToken: newAccessToken,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        isSubscribed: isSubscribed,
+      },
+    });
   } catch (err) {
     res
       .status(403)

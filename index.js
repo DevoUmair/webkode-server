@@ -5,10 +5,17 @@ import { connectDB } from "./db/connectDb.js";
 import userRoutes from "./routes/User.router.js";
 import accountRoutes from "./routes/Account.router.js";
 import cookieParser from "cookie-parser";
-import stripeRoutes from "./routes/Stripe.router.js";
+import stripeRoutes from "./routes/Subscription.router.js";
+import { handleStripeWebhook } from "./controllers/Subscription.controllers.js";
 
 connectDB();
 const app = express();
+app.use(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }), // raw parser here
+  handleStripeWebhook
+);
+
 app.use(cookieParser());
 const allowedOrigins = ["http://localhost:5173"];
 app.use(express.json());
@@ -40,7 +47,6 @@ app.get("/", (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-
 
 app.listen(port, () => {
   console.log("Server listen", port);

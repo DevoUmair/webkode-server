@@ -4,7 +4,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { userId, priceId, userEmail } = req.body;
+    const { priceId, userEmail } = req.body;
+    const id = req.user.id;
+
+    console.log(id);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -16,9 +19,9 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.FRONTEND_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/dashboard`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-      client_reference_id: userId,
+      client_reference_id: id,
     });
 
     res.json({ url: session.url });
@@ -31,6 +34,7 @@ export const createCheckoutSession = async (req, res) => {
 export const handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  console.log("WEBHOOK INVOKED");
 
   let event;
   try {
@@ -49,6 +53,8 @@ export const handleStripeWebhook = async (req, res) => {
         subscription
       );
 
+      console.log("SUBSCRIPTION", stripeSubscription);
+
       await Subscription.create({
         userId,
         stripeCustomerId: customer,
@@ -56,8 +62,12 @@ export const handleStripeWebhook = async (req, res) => {
         plan: stripeSubscription.items.data[0].price.nickname || "Unknown",
         status: stripeSubscription.status,
         startDate: new Date(stripeSubscription.start_date * 1000),
-        endDate: new Date(stripeSubscription.current_period_end * 1000),
-        nextBillingDate: new Date(stripeSubscription.current_period_end * 1000),
+        endDate: new Date(
+          stripeSubscription.items.data[0].current_period_end * 1000
+        ),
+        nextBillingDate: new Date(
+          stripeSubscription.items.data[0].current_period_end * 1000
+        ),
         amount: stripeSubscription.items.data[0].price.unit_amount,
         currency: stripeSubscription.items.data[0].price.currency,
       });
@@ -113,4 +123,20 @@ export const handleStripeWebhook = async (req, res) => {
   }
 
   res.status(200).json({ received: true });
+};
+export const getSubscription = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const subscription = await Subscription.findOne({ userId });
+
+    if (!subscription) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    res.status(200).json(subscription);
+  } catch (error) {
+    console.error("Error fetching subscription:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
