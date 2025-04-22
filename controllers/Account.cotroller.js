@@ -1,14 +1,16 @@
-import Account from '../models/Account.model.js'; 
-import User from '../models/User.model.js'; 
-import mongoose from 'mongoose';
+import Account from "../models/Account.model.js";
+import User from "../models/User.model.js";
+import mongoose from "mongoose";
 
 export const checkBalance = async (req, res) => {
   try {
-    const { userId: requestedUserId } = req.body;  
+    const { userId: requestedUserId } = req.body;
     const decodedId = req.user.id; // From middleware
 
     if (decodedId !== requestedUserId) {
-      return res.status(403).json({ message: 'Unauthorized access. User IDs do not match' });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized access. User IDs do not match" });
     }
 
     const userId = new mongoose.Types.ObjectId(decodedId);
@@ -16,62 +18,67 @@ export const checkBalance = async (req, res) => {
     const account = await Account.findOne({ userId });
 
     if (!account) {
-      return res.status(404).json({ message: 'Account not found for this user' });
+      return res
+        .status(404)
+        .json({ message: "Account not found for this user" });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json({
-      message: 'Account found',
+      message: "Account found",
       balance: account.balance,
-      username: user.fullName, 
+      username: user.fullName,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 export const depositMoney = async (req, res) => {
-    try {
-      const { userId: requestedUserId, amount } = req.body;
-      const decodedId = req.user.id;
-  
-      const numericAmount = Number(amount);
-  
-      if (!numericAmount || numericAmount <= 0) {
-        return res.status(400).json({ message: 'Invalid deposit amount' });
-      }
-  
-      if (decodedId !== requestedUserId) {
-        return res.status(403).json({ message: 'Unauthorized access. User IDs do not match' });
-      }
-  
-      const userId = new mongoose.Types.ObjectId(decodedId);
-  
-      const account = await Account.findOne({ userId });
-  
-      if (!account) {
-        return res.status(404).json({ message: 'Account not found for this user' });
-      }
-  
-      account.balance += numericAmount;
-      await account.save();
-  
-      res.status(200).json({
-        message: 'Deposit successful',
-        newBalance: account.balance,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error', error: err.message });
+  try {
+    const { userId: requestedUserId, amount } = req.body;
+    const decodedId = req.user.id;
+
+    const numericAmount = Number(amount);
+
+    if (!numericAmount || numericAmount <= 0) {
+      return res.status(400).json({ message: "Invalid deposit amount" });
     }
-  };
-  
+
+    if (decodedId !== requestedUserId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized access. User IDs do not match" });
+    }
+
+    const userId = new mongoose.Types.ObjectId(decodedId);
+
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res
+        .status(404)
+        .json({ message: "Account not found for this user" });
+    }
+
+    account.balance += numericAmount;
+    await account.save();
+
+    res.status(200).json({
+      message: "Deposit successful",
+      newBalance: account.balance,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
 export const createAccount = async (req, res) => {
   try {
@@ -81,16 +88,18 @@ export const createAccount = async (req, res) => {
     const decodedId = req.user.id;
 
     if (userId !== decodedId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+      return res.status(403).json({ message: "Unauthorized access" });
     }
 
     const user = await User.findById(userId);
     console.log(user);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const existingAccount = await Account.findOne({ userId });
     if (existingAccount) {
-      return res.status(400).json({ message: 'Account already exists for this user' });
+      return res
+        .status(400)
+        .json({ message: "Account already exists for this user" });
     }
 
     const account = new Account({
@@ -102,15 +111,14 @@ export const createAccount = async (req, res) => {
     await account.save();
 
     res.status(201).json({
-      message: 'Account created successfully',
+      message: "Account created successfully",
       accountId: account._id,
       balance: account.balance,
       cnic: account.cnic,
     });
-
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -122,11 +130,13 @@ export const transferMoney = async (req, res) => {
     const numericAmount = Number(amount);
 
     if (!numericAmount || numericAmount <= 0) {
-      return res.status(400).json({ message: 'Invalid transfer amount' });
+      return res.status(400).json({ message: "Invalid transfer amount" });
     }
 
     if (decodedId !== senderId) {
-      return res.status(403).json({ message: 'Unauthorized. Sender ID mismatch' });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized. Sender ID mismatch" });
     }
 
     const senderObjectId = new mongoose.Types.ObjectId(senderId);
@@ -136,15 +146,17 @@ export const transferMoney = async (req, res) => {
     const receiverAccount = await Account.findOne({ userId: receiverObjectId });
 
     if (!senderAccount) {
-      return res.status(404).json({ message: 'Sender account not found' });
+      return res.status(404).json({ message: "Sender account not found" });
     }
 
     if (!receiverAccount) {
-      return res.status(404).json({ message: 'Receiver account not found' });
+      return res.status(404).json({ message: "Receiver account not found" });
     }
 
     if (senderAccount.balance < numericAmount) {
-      return res.status(400).json({ message: 'Insufficient balance in sender account' });
+      return res
+        .status(400)
+        .json({ message: "Insufficient balance in sender account" });
     }
 
     senderAccount.balance -= numericAmount;
@@ -154,7 +166,7 @@ export const transferMoney = async (req, res) => {
     await receiverAccount.save();
 
     res.status(200).json({
-      message: 'Transfer successful',
+      message: "Transfer successful",
       senderBalance: senderAccount.balance,
       receiverBalance: receiverAccount.balance,
       senderId: senderAccount.userId,
@@ -163,7 +175,6 @@ export const transferMoney = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
