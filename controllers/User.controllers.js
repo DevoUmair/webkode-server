@@ -55,8 +55,11 @@ export const login = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
-    const subscription = await Subscription.findOne({ userId: user._id });
-
+    const subscription = await Subscription.findOne({
+      userId: user.id,
+      status: "active",
+    });
+    const isSubscribed = Boolean(subscription);
     res
       .cookie("refreshToken", refreshToken, cookieOptions)
       .status(200)
@@ -68,7 +71,7 @@ export const login = async (req, res) => {
           fullName: user.fullName,
           email: user.email,
           role: user.role,
-          isSubscribed: subscription && subscription.status === "active",
+          isSubscribed: isSubscribed,
         },
       });
   } catch (err) {
