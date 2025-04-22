@@ -7,7 +7,7 @@ import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 // Route to create a checkout session
-router.get("/subscription", getSubscription);
+router.get("/subscription", verifyToken, getSubscription);
 router.post("/create-checkout-session", verifyToken, createCheckoutSession);
 
 // Webhook route to handle Stripe events
