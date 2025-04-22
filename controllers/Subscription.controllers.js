@@ -124,6 +124,7 @@ export const handleStripeWebhook = async (req, res) => {
 
   res.status(200).json({ received: true });
 };
+
 export const getSubscription = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -138,5 +139,41 @@ export const getSubscription = async (req, res) => {
   } catch (error) {
     console.error("Error fetching subscription:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//  For Admin
+export const cancelSubscription = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    // Find user's subscription in the database
+    const subscription = await Subscription.findOne({ userId });
+
+    if (!subscription) {
+      return res.status(404).json({ message: "No active subscription found" });
+    }
+
+    // Cancel the subscription immediately in Stripe
+    await stripe.subscriptions.cancel(subscription.stripeSubscriptionId, {
+      invoice_now: true,
+      prorate: true,
+    });
+
+    // Update subscription status in the database
+    subscription.status = "canceled";
+    subscription.endDate = new Date();
+    await subscription.save();
+
+    return res.status(200).json({
+      message: "Subscription canceled successfully",
+      subscription,
+    });
+  } catch (error) {
+    console.error("Error canceling subscription:", error);
+    return res.status(500).json({
+      message: "Failed to cancel subscription",
+      error: error.message,
+    });
   }
 };
