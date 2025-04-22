@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import Account from '../models/Account.model.js';
 import Invoice from '../models/Invoice.model.js';
 
+
+
 export const generateInvoice = async (req, res) => {
   try {
     const { senderAccountId, receiverAccountId, amount } = req.body;

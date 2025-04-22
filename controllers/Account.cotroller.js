@@ -154,6 +154,7 @@ export const transferMoney = async (req, res) => {
       return res.status(404).json({ message: "Receiver account not found" });
     }
 
+
     if (senderAccount.balance < numericAmount) {
       return res
         .status(400)
