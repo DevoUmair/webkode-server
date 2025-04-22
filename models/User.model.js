@@ -27,6 +27,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  apiRequests: {
+    count: {
+      type: Number,
+      default: 0,
+    },
+    lastResetTime: {
+      type: Date,
+      default: Date.now,
+    },
+  },
 });
 
 // Hash before save

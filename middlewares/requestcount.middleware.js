@@ -1,32 +1,60 @@
-import Subscription from "../models/Subscription.model.js";
+import User from "../models/User.model.js";
 
-// Request Count Stopper (Stops If user has exceeded limit)
-export const requestcount = async (req, res, next) => {
+// Plan request limits (per 30 minutes)
+const PLAN_LIMITS = {
+  price_1RGTg2JvljWkaejrO0KzUhfR: 10, // Basic - 10 requests per 30 min
+  price_1RGTh5JvljWkaejrRqfQ90TH: 20, // Professional - 20 requests per 30 min
+  price_1RGTihJvljWkaejrc5tdgZwl: 30, // Enterprise - 30 requests per 30 min
+};
+const TIME_WINDOW = 5 * 60 * 1000;
+
+export const requestCounter = async (req, res, next) => {
   try {
     const userId = req.user?.id;
-
+    const plan = req.plan;
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized. User not found." });
     }
 
-    const subscription = await Subscription.findOne({
-      userId,
-      status: "active",
-    });
-    console.log(userId);
-
-    if (!subscription) {
-      return res
-        .status(403)
-        .json({ message: "Access denied. No active subscription found." });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found." });
     }
-    req.plan = subscription.plan;
+
+    const now = new Date();
+    const lastResetTime = new Date(user.apiRequests.lastResetTime);
+    const timeDiff = now - lastResetTime;
+
+    if (timeDiff >= TIME_WINDOW) {
+      user.apiRequests.count = 0;
+      user.apiRequests.lastResetTime = now;
+      await user.save();
+    }
+
+    const requestLimit = PLAN_LIMITS[plan] || 10;
+
+    if (user.apiRequests.count >= requestLimit) {
+      const timeUntilReset = TIME_WINDOW - timeDiff;
+      const minutesUntilReset = Math.ceil(timeUntilReset / (60 * 1000));
+
+      return res.status(429).json({
+        message: `Request limit exceeded for your subscription plan. Please try again in ${minutesUntilReset} minutes.`,
+        currentCount: user.apiRequests.count,
+        limit: requestLimit,
+        plan: plan,
+        nextResetIn: minutesUntilReset,
+        nextResetTime: new Date(lastResetTime.getTime() + TIME_WINDOW),
+      });
+    }
+
+    user.apiRequests.count += 1;
+    await user.save();
 
     next();
   } catch (error) {
-    console.error("Subscription check error:", error);
-    res
-      .status(500)
-      .json({ message: "Server error while checking subscription status." });
+    console.error("Request counter middleware error:", error);
+    res.status(500).json({
+      message: "Server error while checking request limits.",
+    });
   }
 };

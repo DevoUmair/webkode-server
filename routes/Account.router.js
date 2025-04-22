@@ -8,6 +8,7 @@ import {
 } from "../controllers/Account.cotroller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { verifyActiveSubscription } from "../middlewares/subscription.middleware.js";
+import { requestCounter } from "../middlewares/requestcount.middleware.js";
 
 const router = express.Router();
 
@@ -16,9 +17,16 @@ router.post(
   "/check-balance",
   verifyToken,
   verifyActiveSubscription,
+  requestCounter,
   checkBalance
 );
-router.post("/deposit", verifyToken, verifyActiveSubscription, depositMoney);
+router.post(
+  "/deposit",
+  verifyToken,
+  verifyActiveSubscription,
+  requestCounter,
+  depositMoney
+);
 router.post("/create-account", verifyToken, createAccount);
 router.post(
   "/transfer-money",
@@ -30,6 +38,7 @@ router.get(
   "/transaction",
   verifyToken,
   verifyActiveSubscription,
+  requestCounter,
   getAllTransaction
 );
 
