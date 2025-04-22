@@ -4,6 +4,8 @@ import cors from "cors";
 import { connectDB } from "./db/connectDb.js";
 import userRoutes from "./routes/User.router.js";
 import accountRoutes from "./routes/Account.router.js";
+import invoiceRoutes from "./routes/Invoice.router.js";
+import adminRoutes from "./routes/Admin.router.js";
 import cookieParser from "cookie-parser";
 import stripeRoutes from "./routes/Subscription.router.js";
 import { handleStripeWebhook } from "./controllers/Subscription.controllers.js";
@@ -39,6 +41,8 @@ app.use(
 // Routes
 app.use("/api/user", userRoutes);
 app.use("/api/account", accountRoutes);
+app.use("/api/invoice", invoiceRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/stripe", stripeRoutes);
 
 // Routers
