@@ -19,7 +19,7 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.FRONTEND_URL}/dashboard?success=true`,
+      success_url: `${process.env.FRONTEND_URL}/subscription/success`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       client_reference_id: id,
     });
