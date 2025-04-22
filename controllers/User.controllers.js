@@ -60,6 +60,7 @@ export const login = async (req, res) => {
       status: "active",
     });
     const isSubscribed = Boolean(subscription);
+
     res
       .cookie("refreshToken", refreshToken, cookieOptions)
       .status(200)
@@ -71,7 +72,7 @@ export const login = async (req, res) => {
           fullName: user.fullName,
           email: user.email,
           role: user.role,
-          isSubscribed: isSubscribed,
+          isSubscribed: user.role === "admin" ? true : isSubscribed,
         },
       });
   } catch (err) {
@@ -118,7 +119,7 @@ export const refreshAccessToken = async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        isSubscribed: isSubscribed,
+        isSubscribed: user.role === "admin" ? true : isSubscribed,
       },
     });
   } catch (err) {
