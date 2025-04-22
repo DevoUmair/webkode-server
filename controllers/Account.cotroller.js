@@ -7,6 +7,8 @@ export const checkBalance = async (req, res) => {
   try {
     const { userId: requestedUserId } = req.body;
     const decodedId = req.user.id; // From middleware
+    console.log(req.user);
+    console.log(req.plan);
 
     if (decodedId !== requestedUserId) {
       return res
@@ -34,6 +36,7 @@ export const checkBalance = async (req, res) => {
       message: "Account found",
       balance: account.balance,
       username: user.fullName,
+      lastUpdate : account.updatedAt,
     });
   } catch (err) {
     console.error(err);
