@@ -13,8 +13,9 @@ const accountSchema = new mongoose.Schema({
   },
   cnic: {
     type: String,
-    required: true,
-    unique: true, 
+    required: false,   // not required
+    unique: true,
+    sparse: true   
   },
 }, { timestamps: true }); 
 
