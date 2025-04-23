@@ -13,6 +13,7 @@
 import express from 'express';
 import { generateInvoice, getInvoices } from '../controllers/Invoice.controllers.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
+import {requestCounter} from '../middlewares/requestcount.middleware.js'
 
 const router = express.Router();
 
@@ -75,7 +76,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post('/generate-invoice', verifyToken, generateInvoice);
+router.post('/generate-invoice', verifyToken, requestCounter ,generateInvoice);
 
 /**
  * @swagger
@@ -117,7 +118,7 @@ router.post('/generate-invoice', verifyToken, generateInvoice);
  *       500:
  *         description: Server error
  */
-router.get('/get-invoice', verifyToken, getInvoices);
+router.get('/get-invoice', verifyToken, requestCounter , getInvoices);
 
 export default router;
 

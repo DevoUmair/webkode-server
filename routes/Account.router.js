@@ -1,7 +1,14 @@
-import express from 'express';
-import { checkBalance , depositMoney  , createAccount, transferMoney , getAllTransaction} from '../controllers/Account.cotroller.js';
-import { verifyToken  } from '../middlewares/auth.middleware.js';
-import { verifyActiveSubscription  } from '../middlewares/subscription.middleware.js';
+import express from "express";
+import {
+  checkBalance,
+  depositMoney,
+  createAccount,
+  transferMoney,
+  getAllTransaction,
+} from "../controllers/Account.cotroller.js";
+import { verifyToken } from "../middlewares/auth.middleware.js";
+import { verifyActiveSubscription } from "../middlewares/subscription.middleware.js";
+import { requestCounter } from "../middlewares/requestcount.middleware.js";
 
 const router = express.Router();
 
@@ -64,7 +71,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
 */
-router.post('/check-balance', verifyToken, verifyActiveSubscription, checkBalance);
+router.post('/check-balance', verifyToken, verifyActiveSubscription,requestCounter,checkBalance);
 
 /**
  * @swagger
@@ -111,7 +118,7 @@ router.post('/check-balance', verifyToken, verifyActiveSubscription, checkBalanc
  *       500:
  *         description: Server error
 */
-router.post('/deposit', verifyToken, verifyActiveSubscription, depositMoney);
+router.post('/deposit', verifyToken, verifyActiveSubscription, requestCounter , depositMoney);
 
 /**
  * @swagger
