@@ -2,9 +2,9 @@ import User from "../models/User.model.js";
 
 // Plan request limits (per 30 minutes)
 const PLAN_LIMITS = {
-  price_1RGTg2JvljWkaejrO0KzUhfR: 10, // Basic - 10 requests per 30 min
-  price_1RGTh5JvljWkaejrRqfQ90TH: 20, // Professional - 20 requests per 30 min
-  price_1RGTihJvljWkaejrc5tdgZwl: 30, // Enterprise - 30 requests per 30 min
+  price_1RGTg2JvljWkaejrO0KzUhfR: 20, // Basic
+  price_1RGTh5JvljWkaejrRqfQ90TH: 50, // Professional
+  price_1RGTihJvljWkaejrc5tdgZwl: 100, // Enterprise
 };
 const TIME_WINDOW = 5 * 60 * 1000;
 
