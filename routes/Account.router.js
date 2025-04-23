@@ -260,5 +260,5 @@ router.post('/transfer-money', verifyToken, verifyActiveSubscription, transferMo
  *       500:
  *         description: Server error
 */
-router.get('/transaction', verifyToken, verifyActiveSubscription, getAllTransaction);
+router.get('/transaction', verifyToken, verifyActiveSubscription,requestCounter,getAllTransaction);
 export default router;
